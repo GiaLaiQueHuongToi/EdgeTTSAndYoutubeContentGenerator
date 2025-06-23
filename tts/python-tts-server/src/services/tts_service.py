@@ -33,9 +33,6 @@ class TTSService:
         }
 
     async def synthesize_speech(self, request: TTSRequest) -> Dict:
-        """
-        Main synthesis method that returns complete response data
-        """
         try:
             if not request.text.strip():
                 return {
@@ -179,19 +176,15 @@ class TTSService:
         return round(duration_seconds, 3)
 
     def get_supported_languages(self) -> SupportedLanguages:
-        """Get supported languages response"""
         return SupportedLanguages(languages=list(self.default_voices.keys()))
 
     def get_supported_voices(self) -> SupportedVoices:
-        """Get supported voices response"""
         return SupportedVoices(voices=self.default_voices)
 
     def get_supported_emotions(self) -> Dict[str, List[str]]:
-        """Get supported emotions response"""
         return {'emotions': list(self.emotion_prosody.keys())}
 
     def get_health_status(self) -> HealthResponse:
-        """Get health status response"""
         return HealthResponse(
             status='ok',
             available_languages=list(self.default_voices.keys()),
@@ -199,7 +192,6 @@ class TTSService:
         )
 
     def cleanup_file(self, file_path: str):
-        """Clean up temporary files"""
         try:
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
