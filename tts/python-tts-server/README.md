@@ -20,7 +20,7 @@ A Python Flask server that provides Text-to-Speech (TTS) functionality using Mic
 
 ### 1. Clone or download the project
 ```bash
-cd "d:\SEMESTER 6TH\THIET KE PHAN MEM\DemoGemini\tts\python-tts-server"
+cd "EdgeTTSAndYoutubeContentGenerator\tts\python-tts-server"
 ```
 
 ### 2. Create a virtual environment
@@ -28,8 +28,17 @@ cd "d:\SEMESTER 6TH\THIET KE PHAN MEM\DemoGemini\tts\python-tts-server"
 # Create virtual environment
 python -m venv venv
 
-# Activate virtual environment (Windows)
-venv\Scripts\activate
+# Activate virtual environment
+
+- **Windows:**
+  ```bash
+  venv\Scripts\activate
+  ```
+
+- **macOS/Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
 
 # You should see (venv) in your command prompt
 ```

@@ -9,7 +9,6 @@ class TTSRequest(BaseModel):
     output_filename: Optional[str] = None
 
 class TTSResponse(BaseModel):
-    audio_url: str
     duration_seconds: float
     language: str
     gender: str

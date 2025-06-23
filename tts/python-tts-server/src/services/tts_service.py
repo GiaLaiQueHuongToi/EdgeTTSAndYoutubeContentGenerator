@@ -5,7 +5,7 @@ import asyncio
 import uuid
 from mutagen.mp3 import MP3
 from typing import Dict, List, Optional
-from src.models.tts_models import TTSRequest, TTSResponse, SupportedLanguages, SupportedVoices, HealthResponse
+from ..models.tts_models import TTSRequest, TTSResponse, SupportedLanguages, SupportedVoices, HealthResponse
 
 class TTSService:
     def __init__(self):
@@ -61,9 +61,8 @@ class TTSService:
             with open(audio_file, 'rb') as f:
                 audio_data = f.read()
 
-            # Create response
-            response = TTSResponse(
-                audio_url=f"/audio/{os.path.basename(audio_file)}",
+            # Create metadata response
+            metadata = TTSResponse(
                 duration_seconds=duration,
                 language=request.language,
                 gender=request.gender,
@@ -76,8 +75,9 @@ class TTSService:
 
             return {
                 'success': True,
-                'audio_data': audio_data,
-                'response': response,
+                'audio_data': audio_data,        # ← Raw binary data (bytes)
+                'metadata': metadata,            # ← Metadata without URL
+                'content_type': 'audio/mpeg',   # ← For HTTP response
                 'status_code': 200
             }
 
@@ -96,9 +96,6 @@ class TTSService:
         emotion: str = 'neutral',
         output_filename: Optional[str] = None
     ) -> tuple:
-        """
-        Internal method to generate audio file
-        """
         # Generate unique filename if not provided
         if not output_filename:
             temp_dir = tempfile.gettempdir()
@@ -112,8 +109,7 @@ class TTSService:
         current_rate = prosody_settings['rate']
         current_pitch = prosody_settings['pitch']
 
-        print(f"Generating audio with voice: {voice_name}, rate: {current_rate}, pitch: {current_pitch}")
-        
+    
         communicate = edge_tts.Communicate(
             text=text,
             voice=voice_name,
@@ -148,7 +144,6 @@ class TTSService:
         return output_filename, duration_seconds, voice_name
 
     def _get_voice_name(self, language: str, gender: str) -> str:
-        """Get the voice name for given language and gender"""
         voice_map = self.default_voices.get(language, self.default_voices['en-US'])
         voice_name = voice_map.get(gender, voice_map.get('female') or voice_map.get('male'))
         
@@ -159,7 +154,6 @@ class TTSService:
         return voice_name
 
     def _get_audio_duration(self, file_path: str) -> float:
-        """Get duration of audio file in seconds"""
         duration_seconds = 0.0
         
         if os.path.exists(file_path) and os.path.getsize(file_path) > 0:

@@ -6,53 +6,33 @@ from src.models.tts_models import TTSRequest
 app = Flask(__name__)
 tts_service = TTSService()
 
-@app.route('/synthesize', methods=['POST'])
-def synthesize():
-    """TTS synthesis endpoint - returns audio file"""
-    try:
-        # Validate request data
-        data = request.get_json()
-        if not data:
-            return jsonify({'error': 'JSON data required'}), 400
-        
-        # Create and validate request model
-        try:
-            tts_request = TTSRequest(**data)
-        except Exception as e:
-            return jsonify({'error': f'Invalid request data: {str(e)}'}), 400
-        
-        # Call service method
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-        try:
-            result = loop.run_until_complete(tts_service.synthesize_speech(tts_request))
-        finally:
-            loop.close()
-        
-        # Handle service response
-        if not result['success']:
-            return jsonify({'error': result['error']}), result['status_code']
-        
-        # Return audio with metadata in headers
-        response = Response(
-            result['audio_data'],
-            mimetype='audio/mpeg',
-            headers={
-                'Content-Disposition': 'attachment; filename=tts.mp3',
-                'Content-Type': 'audio/mpeg',
-                'X-Duration-Seconds': str(result['response'].duration_seconds),
-                'X-Language': result['response'].language,
-                'X-Gender': result['response'].gender,
-                'X-Emotion': result['response'].emotion,
-                'X-Voice-Name': result['response'].voice_name
-            }
-        )
-        
-        return response
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+import io
+
+@app.post("/tts/synthesize")
+async def synthesize_speech(request: TTSRequest):
+    result = await tts_service.synthesize_speech(request)
+    
+    if not result['success']:
+        return {"error": result['error']}, result['status_code']
+    
+    # Create binary stream
+    audio_stream = io.BytesIO(result['audio_data'])
+    
+    # Return binary stream with metadata in headers
+    return StreamingResponse(
+        audio_stream,
+        media_type=result['content_type'],
+        headers={
+            "Content-Disposition": "attachment; filename=audio.mp3",
+            "X-Duration": str(result['metadata'].duration_seconds),
+            "X-Language": result['metadata'].language,
+            "X-Gender": result['metadata'].gender,
+            "X-Voice": result['metadata'].voice_name,
+            "X-Emotion": result['metadata'].emotion
+        }
+    )
 
 @app.route('/synthesize-json', methods=['POST'])
 def synthesize_json():
