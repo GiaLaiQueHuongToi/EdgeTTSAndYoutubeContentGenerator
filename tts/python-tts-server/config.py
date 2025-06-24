@@ -2,7 +2,7 @@
 
 class Config:
     DEBUG = True  # Set to False in production
-    SERVER_PORT = 5000  # Port for the server to run on
+    SERVER_PORT = 9999  # Port for the server to run on
     SERVER_HOST = '0.0.0.0'
     
     # Edge TTS settings

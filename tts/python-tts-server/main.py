@@ -1,9 +1,19 @@
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS
 import asyncio
 from src.services.tts_service import TTSService
 from src.models.tts_models import TTSRequest
 
 app = Flask(__name__)
+
+# Cấu hình CORS
+CORS(app, 
+     origins=['*'],  # Cho phép tất cả domains (hoặc chỉ định cụ thể)
+     methods=['GET', 'POST', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Authorization', 'Accept'],
+     supports_credentials=True
+)
+
 tts_service = TTSService()
 
 @app.route('/synthesize', methods=['POST'])
@@ -60,4 +70,4 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=9999, debug=True)
