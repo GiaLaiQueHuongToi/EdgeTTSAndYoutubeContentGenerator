@@ -1,5 +1,6 @@
 edge-tts
 Flask
+Flask-CORS
 mutagen
 pydub
 pydantic
